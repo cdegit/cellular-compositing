@@ -5,6 +5,7 @@ image = {}
 
 image1Cells = {}
 image2Cells = {}
+image3Cells = {}
 
 function love.load() 
 	love.window.setMode(150, 150)
@@ -21,6 +22,11 @@ function love.load()
 		local tempCell = Cell.create(love.image.newImageData("space2.png"))
 		table.insert(image2Cells, tempCell)
 	end	
+
+	for i = 1, 10 do
+		local tempCell = Cell.create(love.image.newImageData("lion.png"))
+		table.insert(image3Cells, tempCell)
+	end		
 end
 
 function love.draw()
@@ -36,6 +42,12 @@ function love.draw()
 		tempCell:move()
 		tempCell:paint(imageData)
 	end	
+
+	for i = 1, 10 do
+		local tempCell = image3Cells[i]
+		tempCell:move()
+		tempCell:paint(imageData)
+	end		
 
 
 	image:refresh()

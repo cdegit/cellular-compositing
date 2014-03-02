@@ -13,15 +13,24 @@ function Cell.create(image)
    cell.b = math.random(0, 255)
 
    cell.source = image
+   cell.moveType = "bright"
+   cell.drawType = 1
+
+   cell.lastLocations = {}
+   cell.lastLocationsMax = 5
+
    return cell
 end
 
-function Cell:move()
-	self.x = self.x + math.round(math.random(-1, 1))
+function Cell:move(canvas)
 	self.x = math.clamp(self.x, 0, 99)
-
-	self.y = self.y + math.round(math.random(-1, 1))
 	self.y = math.clamp(self.y, 0, 99)
+
+	self:hillClimb(canvas)
+
+	if table.getn(self.lastLocations) > self.lastLocationsMax then
+		table.remove(self.lastLocations, 1)
+	end
 end
 
 -- canvas is an imageData object
@@ -29,6 +38,110 @@ function Cell:paint(canvas)
 	self.r, self.g, self.b = self.source:getPixel(self.x, self.y)
 	canvas:setPixel(self.x, self.y, self.r, self.g, self.b, 255)
 end
+
+function Cell:hillClimb(canvas)
+	-- look at the nearby kernel
+	-- determine which direction to move in based on move type
+	
+	-- get starting pixel
+	newX = 0
+	newY = 0
+
+	local newr, newg, newb = canvas:getPixel(self.x, self.y)
+
+	for x = -1, 1 do
+		for y = -1, 1 do
+			if not self:inLastLocations(x, y) then -- this isn't actually helping the way I think it is
+				if self.x + x < 99 and self.y + y < 99 and self.y + y > 0 and self.x + x > 0 then
+					-- compare with r, g, b
+					-- if we have found something better based on the type, replace
+					local r, g, b = canvas:getPixel(self.x + x, self.y + y)
+					local foundBetter = false
+
+					if self.moveType == "bright" then
+						foundBetter = self:brighter(r, g, b, newr, newg, newb)
+					end
+
+					if foundBetter then
+						-- set newX and newY
+						newX = x
+						newY = y
+
+						-- to introduce some randomness, maybe break here
+						local chance = math.random(0, 100)
+						if chance > 50 then -- this should probably be significantly reduced, but currently performs well
+							break
+						end
+					end
+				end
+			end
+		end	
+		local chance = math.random(0, 100)
+		if chance < 20 then
+			break
+		end
+
+	end
+
+	-- now we have newX and newY set to what we want
+	-- so we can move to those locations
+	self.x = self.x + newX
+	self.x = math.clamp(self.x, 0, 99)
+
+	self.y = self.y + newY
+	self.y = math.clamp(self.y, 0, 99)
+
+	-- add this location to the list of last locations so we won't go back to this point for the next few steps
+	local location = {self.y, self.x}
+	table.insert(self.lastLocations, location)
+
+end
+
+-- check if a given location is in the last few locations visited
+function Cell:inLastLocations(x, y)
+	local newLocation = {self.x + x, self.y + y}
+
+	for i = 1, table.getn(self.lastLocations) do
+		if self.lastLocations[i] == newLocation then
+			return true
+		end
+	end
+
+	return false
+end
+
+-- returns true if rgb1 is brighter than rgb2
+function Cell:brighter(r1, g1, b1, r2, g2, b2)
+	-- average the values for all colours, check
+	local av1 = (r1 + g1 + b1) / 3
+	local av2 = (r2 + g2 + b2) / 3
+
+	if av1 >= av2 then
+		return true
+	else 
+		return false
+	end
+end
+
+function Cell:darker()
+
+end
+
+function Cell:redder()
+
+end
+
+function Cell:greener()
+
+end
+
+function Cell:bluer()
+
+end
+
+-- maybe also add edges, maybe even watersheds if feeling ambitious
+
+-- Utility functions
 
 function math.round(input)
 	lower = math.floor(input)

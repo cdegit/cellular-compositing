@@ -1,10 +1,12 @@
 Cell = {}
 Cell.__index = Cell
 
+-- math.random works better if the seed is set outside the function that is called in a loop
+math.randomseed(os.time())
+
 function Cell.create(image)
    local cell = {}             -- our new object
    setmetatable(cell,Cell)
-   math.randomseed(os.time())
    cell.x = math.random(0, 99)
    cell.y = math.random(0, 99)
 
@@ -13,7 +15,7 @@ function Cell.create(image)
    cell.b = math.random(0, 255)
 
    cell.source = image
-   cell.moveType = "red"
+   cell.moveType = "bright"
    cell.drawType = "add"
 
    cell.lastLocations = {}
@@ -208,7 +210,13 @@ function Cell:add(r, g, b, cr, cg, cb)
 end
 
 function Cell:subtract(r, g, b, cr, cg, cb)
-	-- TODO: Implement Subtract Operator
+	r = r - cr
+	g = g - cg
+	b = b - cb
+
+	math.clamp(r, 0, 255)
+	math.clamp(g, 0, 255)
+	math.clamp(b, 0, 255)
 	return r, g, b
 end
 

@@ -9,10 +9,10 @@ image3Cells = {}
 
 alert = ""
 
-function love.load() 
+function love.load()
 	--love.window.setMode(150, 150)
 
-	imageData = love.image.newImageData("gradient4.png")
+	imageData = love.image.newImageData("colors.png")
 	image = love.graphics.newImage(imageData)
 
 	for i = 1, 10 do
@@ -23,12 +23,12 @@ function love.load()
 	for i = 1, 10 do
 		local tempCell = Cell.create(love.image.newImageData("space2.png"))
 		table.insert(image2Cells, tempCell)
-	end	
+	end
 
 	for i = 1, 10 do
 		local tempCell = Cell.create(love.image.newImageData("white.png"))
 		table.insert(image3Cells, tempCell)
-	end		
+	end
 end
 
 function love.draw()
@@ -37,21 +37,21 @@ function love.draw()
 
 	for i = 1, 10 do
 		local tempCell = image1Cells[i]
-		tempCell:move(love.image.newImageData("gradient4.png"))
+		tempCell:move(love.image.newImageData("colors.png"))
 		tempCell:paint(imageData)
-	end	
+	end
 
 	for i = 1, 10 do
 		local tempCell = image2Cells[i]
-		tempCell:move(love.image.newImageData("gradient4.png"))
+		tempCell:move(love.image.newImageData("colors.png"))
 		tempCell:paint(imageData)
-	end	
+	end
 
 	for i = 1, 10 do
 		local tempCell = image3Cells[i]
-		tempCell:move(love.image.newImageData("gradient4.png"))
+		tempCell:move(love.image.newImageData("colors.png"))
 		tempCell:paint(imageData)
-	end		
+	end
 
 
 	image:refresh()

@@ -14,7 +14,7 @@ function Cell.create(image)
 
    cell.source = image
    cell.moveType = "bright"
-   cell.drawType = 1
+   cell.drawType = "add"
 
    cell.lastLocations = {}
    cell.lastLocationsMax = 5
@@ -36,7 +36,23 @@ end
 -- canvas is an imageData object
 function Cell:paint(canvas)
 	self.r, self.g, self.b = self.source:getPixel(self.x, self.y)
-	canvas:setPixel(self.x, self.y, self.r, self.g, self.b, 255)
+	local canr, cang, canb = canvas:getPixel(self.x, self.y)
+
+	local newR = 0
+	local newG = 0
+	local newB = 0
+
+	if self.drawType == "set" then
+		newR = self.r
+		newG = self.g
+		newB = self.b
+	elseif self.drawType == "add" then
+		newR, newG, newB = self:add(self.r, self.g, self.b, canr, cang, canb)
+	elseif self.drawType == "subtract" then
+		newR, newG, newB = self:subtract(self.r, self.g, self.b, canr, cang, canb)
+	end
+
+	canvas:setPixel(self.x, self.y, newR, newG, newB, 255)
 end
 
 function Cell:hillClimb(canvas)
@@ -141,6 +157,33 @@ end
 
 -- maybe also add edges, maybe even watersheds if feeling ambitious
 
+
+
+-- Painting Functions
+
+function Cell:add(r, g, b, cr, cg, cb) 
+	r = r + cr
+	g = g + cg
+	b = b + cb
+
+	math.clamp(r, 0, 255)
+	math.clamp(g, 0, 255)
+	math.clamp(b, 0, 255)
+
+	return r, g, b
+
+end
+
+function Cell:subtract(r, g, b, cr, cg, cb)
+	-- TODO: Implement Subtract Operator
+	return r, g, b
+end
+
+function Cell:over(r, g, b, cr, cg, cb)
+
+end
+
+
 -- Utility functions
 
 function math.round(input)
@@ -160,3 +203,4 @@ function math.clamp(input, min_val, max_val)
 	end
 	return input
 end
+

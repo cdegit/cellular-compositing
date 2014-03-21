@@ -3,7 +3,7 @@ Cell.__index = Cell
 
 function Cell.create(image)
    local cell = {}             -- our new object
-   setmetatable(cell,Cell)  
+   setmetatable(cell,Cell)
    math.randomseed(os.time())
    cell.x = math.random(0, 99)
    cell.y = math.random(0, 99)
@@ -13,7 +13,7 @@ function Cell.create(image)
    cell.b = math.random(0, 255)
 
    cell.source = image
-   cell.moveType = "bright"
+   cell.moveType = "red"
    cell.drawType = "add"
 
    cell.lastLocations = {}
@@ -58,7 +58,7 @@ end
 function Cell:hillClimb(canvas)
 	-- look at the nearby kernel
 	-- determine which direction to move in based on move type
-	
+
 	-- get starting pixel
 	newX = 0
 	newY = 0
@@ -76,6 +76,18 @@ function Cell:hillClimb(canvas)
 
 					if self.moveType == "bright" then
 						foundBetter = self:brighter(r, g, b, newr, newg, newb)
+
+					elseif self.moveType == "dark" then
+						foundBetter = self:darker(r, g, b, newr, newg, newb)
+
+					elseif self.moveType == "red" then
+						foundBetter = self:redder(r, newr)
+
+					elseif self.moveType == "green" then
+						foundBetter = self:greener(g, newg)
+
+					elseif self.moveType == "blue" then
+						foundBetter = self:bluer(b, newb)
 					end
 
 					if foundBetter then
@@ -91,7 +103,7 @@ function Cell:hillClimb(canvas)
 					end
 				end
 			end
-		end	
+		end
 		local chance = math.random(0, 100)
 		if chance < 20 then
 			break
@@ -134,25 +146,46 @@ function Cell:brighter(r1, g1, b1, r2, g2, b2)
 
 	if av1 >= av2 then
 		return true
-	else 
+	else
 		return false
 	end
 end
 
-function Cell:darker()
+-- returns true if rgb1 is darker than rgb2
+function Cell:darker(r1, g1, b1, r2, g2, b2)
+	-- average the values for all colours, check
+	local av1 = (r1 + g1 + b1) / 3
+	local av2 = (r2 + g2 + b2) / 3
 
+	if av1 <= av2 then
+		return true
+	else
+		return false
+	end
 end
 
-function Cell:redder()
-
+function Cell:redder(r1, r2)
+	if r1 >= r2 then
+		return true
+	else
+		return false
+	end
 end
 
-function Cell:greener()
-
+function Cell:greener(g1, g2)
+	if g1 >= g2 then
+		return true
+	else
+		return false
+	end
 end
 
-function Cell:bluer()
-
+function Cell:bluer(b1, b2)
+	if b1 >= b2 then
+		return true
+	else
+		return false
+	end
 end
 
 -- maybe also add edges, maybe even watersheds if feeling ambitious
@@ -161,7 +194,7 @@ end
 
 -- Painting Functions
 
-function Cell:add(r, g, b, cr, cg, cb) 
+function Cell:add(r, g, b, cr, cg, cb)
 	r = r + cr
 	g = g + cg
 	b = b + cb

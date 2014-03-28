@@ -15,8 +15,8 @@ function Cell.create(image)
    cell.b = math.random(0, 255)
 
    cell.source = image
-   cell.moveType = "bright"
-   cell.drawType = "add"
+   cell.moveType = "dark"
+   cell.drawType = "set"
 
    cell.lastLocations = {}
    cell.lastLocationsMax = 5
@@ -244,4 +244,3 @@ function math.clamp(input, min_val, max_val)
 	end
 	return input
 end
-

@@ -7,7 +7,9 @@ image1Cells = {}
 image2Cells = {}
 image3Cells = {}
 
-currentCellId = 1
+cellCount = 5
+cellModel = {}
+
 collisionMatrix = {}
 
 alert = ""
@@ -18,30 +20,23 @@ function love.load()
 	imageData = love.image.newImageData("colors.png")
 	image = love.graphics.newImage(imageData)
 
-	for i = 1, 10 do
-		local tempCell = Cell.create(love.image.newImageData("space.png"))
-		tempCell.id = currentCellId
-		currentCellId = currentCellId + 1
-		table.insert(image1Cells, tempCell)
+	for i = 1, cellCount do
+		local img = love.image.newImageData("space.png")
+		if i > 10 and i <= 20 then
+			img = love.image.newImageData("space2.png")
+		end 
+		if i > 20 then
+			img = love.image.newImageData("white.png")
+		end
+
+		local tempCell = Cell.create(img)
+		tempCell.id = i
+		table.insert(cellModel, tempCell)
 	end
 
-	for i = 1, 10 do
-		local tempCell = Cell.create(love.image.newImageData("space2.png"))
-		tempCell.id = currentCellId
-		currentCellId = currentCellId + 1		
-		table.insert(image2Cells, tempCell)
-	end
-
-	for i = 1, 10 do
-		local tempCell = Cell.create(love.image.newImageData("white.png"))
-		tempCell.id = currentCellId
-		currentCellId = currentCellId + 1		
-		table.insert(image3Cells, tempCell)
-	end
-
-	for x = 1, 100 do
+	for x = 1, 101 do
 		collisionMatrix[x] = {}
-		for y = 1, 100 do 
+		for y = 1, 101 do 
 			collisionMatrix[x][y] = 0
 		end
 	end
@@ -49,26 +44,19 @@ end
 
 function love.draw()
 
+	for i = 1, table.getn(cellModel) do
+		local tempCell = cellModel[i]
+		if tempCell ~= NULL then
+			tempCell:move(love.image.newImageData("colors.png"), collisionMatrix, cellModel)
+			tempCell:paint(imageData)
+			alert = alert .. tempCell.id
+			alert = alert .. "\n"
+		end
+	end
+
+
 	love.graphics.print(alert, 0, 200)
-
-	for i = 1, 10 do
-		local tempCell = image1Cells[i]
-		tempCell:move(love.image.newImageData("colors.png"), collisionMatrix)
-		tempCell:paint(imageData)
-	end
-
-	for i = 1, 10 do
-		local tempCell = image2Cells[i]
-		tempCell:move(love.image.newImageData("colors.png"), collisionMatrix)
-		tempCell:paint(imageData)
-	end
-
-	for i = 1, 10 do
-		local tempCell = image3Cells[i]
-		tempCell:move(love.image.newImageData("colors.png"), collisionMatrix)
-		tempCell:paint(imageData)
-	end
-
+	alert = ""
 
 	image:refresh()
 	love.graphics.draw(image, 0, 0)

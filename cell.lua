@@ -16,7 +16,7 @@ function Cell.create(image)
 
    cell.source = image
    cell.moveType = "red"
-   cell.drawType = "add"
+   cell.drawType = "set"
 
    cell.lastLocations = {}
    cell.lastLocationsMax = 5
@@ -26,11 +26,16 @@ function Cell.create(image)
    return cell
 end
 
-function Cell:move(canvas)
-	self.x = math.clamp(self.x, 0, 99)
-	self.y = math.clamp(self.y, 0, 99)
+function Cell:move(canvas, collisionMatrix, cellModel)
+	self.x = math.clamp(self.x, 1, 99)
+	self.y = math.clamp(self.y, 1, 99)
+
+	local lastX = self.x
+	local lastY = self.y
 
 	self:hillClimb(canvas)
+
+	self:checkCollisions(collisionMatrix, cellModel, lastX, lastY)
 
 	if table.getn(self.lastLocations) > self.lastLocationsMax then
 		table.remove(self.lastLocations, 1)
@@ -64,8 +69,8 @@ function Cell:hillClimb(canvas)
 	-- determine which direction to move in based on move type
 
 	-- get starting pixel
-	newX = 0
-	newY = 0
+	newX = -1
+	newY = -1
 
 	local newr, newg, newb = canvas:getPixel(self.x, self.y)
 
@@ -226,6 +231,112 @@ function Cell:over(r, g, b, cr, cg, cb)
 
 end
 
+
+
+
+function Cell:checkCollisions(collisionMatrix, cellModel, lastX, lastY)
+	-- go to collisionMatrix[x][y]
+	-- if value there is 0, no collisions
+		-- write our id there
+		-- go to collisionMatrix[lastX, lastY] and set to 0
+	-- if non-zero value, collision
+		-- reproduce
+
+	-- if self = last, will destroy self
+		self.x = math.clamp(self.x, 1, 99)
+		self.y = math.clamp(self.y, 1, 99)
+
+		lastX = math.clamp(lastX, 1, 99)
+		lastY = math.clamp(lastY, 1, 99)
+
+	if self.x == lastX and self.y == lastY then
+		--alert = alert .. "self collision with " .. self.id
+		return
+	end
+
+	if collisionMatrix[self.x][self.y] == 0 then
+		collisionMatrix[self.x][self.y] = self.id
+	else 
+		local cellIndex = collisionMatrix[self.x][self.y]
+		if(cellModel[cellIndex] ~= NULL) then
+			self:reproduce(cellModel[cellIndex], cellModel)
+		end
+	end
+
+	collisionMatrix[lastX][lastY] = 0
+end
+
+function Cell:reproduce(otherParent, cellModel)
+	-- randomly select one of their draw modes
+	-- combine their images based on that draw modes
+	-- create child with that image
+	-- child inherits other draw modes
+	-- parent cells are destroyed
+	-- entry in collision matrix is now for child
+	-- parents are not removed from the cell model, but they are set to null?
+	-- this isn't ideal, but it's more efficient than getting all the other cells to update their indices
+	-- can grow exponentially? But does have an upper bound so we cool. 
+
+	-- n + n/2 + n/4 + n/8...
+	-- Sum of n/2^i, while 2^i <= n
+	local move = ""
+	local draw = ""
+	local draw2 = ""
+	local id = table.getn(cellModel) + 1
+
+	local chance = math.random(0, 100)
+	if chance < 50 then
+		draw = self.drawType
+		draw2 = otherParent.drawType
+		move = self.moveType
+	else
+		draw = otherParent.drawType
+		draw2 = self.drawType
+		move = otherParent.moveType
+	end
+
+	local img = self:combineImages(self.source, otherParent.source, draw)
+	local childCell = Cell.create(img)
+
+	childCell.id = id
+	childCell.drawType = draw2
+	childCell.x = self.x
+	childCell.y = self.y
+
+	table.insert(cellModel, childCell)
+	
+	-- remove parents
+	cellModel[self.id] = NULL
+	cellModel[otherParent.id] = NULL
+
+end
+
+function Cell:combineImages(img1, img2, mode)
+	result = img1
+
+	for x = 1, 99 do
+		for y = 1, 99 do
+			local r1, g1, b1 = img1:getPixel(x, y)
+			local r2, g2, b2 = img2:getPixel(x, y)
+			local newR, newG, newB = 0
+
+			if mode == "set" then
+				newR = r1
+				newG = g1
+				newB = b1
+			elseif mode == "add" then
+				newR, newG, newB = self:add(r1, g1, b1, r2, g2, b2)
+			elseif mode == "subtract" then
+				newR, newG, newB = self:subtract(r1, g1, b1, r2, g2, b2)
+			end
+
+			result:setPixel(x, y, newR, newG, newB, 255)
+
+		end
+	end
+
+	return result
+end
 
 -- Utility functions
 

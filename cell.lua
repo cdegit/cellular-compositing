@@ -15,11 +15,13 @@ function Cell.create(image)
    cell.b = math.random(0, 255)
 
    cell.source = image
-   cell.moveType = "bright"
+   cell.moveType = "red"
    cell.drawType = "add"
 
    cell.lastLocations = {}
    cell.lastLocationsMax = 5
+
+   cell.id = -1
 
    return cell
 end

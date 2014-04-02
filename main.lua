@@ -3,11 +3,13 @@ require "Cell"
 imageData = {}
 image = {}
 
+moveImage = {}
+
 image1Cells = {}
 image2Cells = {}
 image3Cells = {}
 
-cellCount = 5
+cellCount = 50
 cellModel = {}
 
 collisionMatrix = {}
@@ -19,6 +21,8 @@ function love.load()
 
 	imageData = love.image.newImageData("colors.png")
 	image = love.graphics.newImage(imageData)
+	moveImage = love.image.newImageData("colors.png")
+
 	-- to fix blurry image scaling
 	image:setFilter( 'nearest', 'nearest' )
 
@@ -52,10 +56,8 @@ function love.draw()
 	for i = 1, table.getn(cellModel) do
 		local tempCell = cellModel[i]
 		if tempCell ~= NULL then
-			tempCell:move(love.image.newImageData("colors.png"), collisionMatrix, cellModel)
+			tempCell:move(moveImage, collisionMatrix, cellModel)
 			tempCell:paint(imageData)
-			alert = alert .. tempCell.id
-			alert = alert .. "\n"
 		end
 	end
 
@@ -64,5 +66,5 @@ function love.draw()
 	love.graphics.pop()
 
 	love.graphics.print(alert, 0, 500)
-	alert = ""
+	alert = table.getn(cellModel)
 end

@@ -15,8 +15,31 @@ function Cell.create(image)
    cell.b = math.random(0, 255)
 
    cell.source = image
-   cell.moveType = "red"
-   cell.drawType = "set"
+
+   local moveRand = math.random(1, 5)
+
+   if moveRand == 1 then
+   	cell.moveType = "bright"
+   elseif moveRand == 2 then
+	cell.moveType = "dark"
+   elseif moveRand == 3 then
+	cell.moveType = "red"
+   elseif moveRand == 4 then
+   	cell.moveType = "blue"
+   else 
+   	cell.moveType = "green"
+   end
+
+
+   local drawRand = math.random(1, 3)
+   
+   if drawRand == 1 then
+   	cell.drawType = "set"
+   elseif drawRand == 2 then
+   	cell.drawType = "add"
+   else
+   	cell.drawType = "subtract"
+   end
 
    cell.lastLocations = {}
    cell.lastLocationsMax = 5

@@ -281,7 +281,7 @@ function Cell:checkCollisions(collisionMatrix, cellModel, lastX, lastY)
 		collisionMatrix[self.x][self.y] = self.id
 	else 
 		local cellIndex = collisionMatrix[self.x][self.y]
-		if(cellModel[cellIndex] ~= NULL) then
+		if(cellModel[cellIndex] ~= -1) then
 			self:reproduce(cellModel[cellIndex], cellModel)
 		end
 	end
@@ -329,8 +329,8 @@ function Cell:reproduce(otherParent, cellModel)
 	table.insert(cellModel, childCell)
 	
 	-- remove parents
-	cellModel[self.id] = NULL
-	cellModel[otherParent.id] = NULL
+	cellModel[self.id] = -1
+	cellModel[otherParent.id] = -1
 
 end
 

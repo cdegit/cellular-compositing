@@ -55,7 +55,7 @@ function love.draw()
 
 	for i = 1, table.getn(cellModel) do
 		local tempCell = cellModel[i]
-		if tempCell ~= NULL then
+		if tempCell ~= -1 then
 			tempCell:move(moveImage, collisionMatrix, cellModel)
 			tempCell:paint(imageData)
 		end

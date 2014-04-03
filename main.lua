@@ -27,6 +27,15 @@ greenFillMode = "line"
 blueFillMode = "line"
 lionSelectedFill = 0
 
+buttons = {}
+buttons["red"] = {["x"] = 100, ["fillMode"] = "line", ["r"] = 255, ["g"] = 0, ["b"] = 0}
+buttons["green"] = {["x"] = 220, ["fillMode"] = "line", ["r"] = 0, ["g"] = 255, ["b"] = 0}
+buttons["blue"] = {["x"] = 160, ["fillMode"] = "line", ["r"] = 0, ["g"] = 0, ["b"] = 255}
+--buttons["bright"] = {["x"] = 1, ["fillMode"] = "line"}
+--buttons["dark"] = {["x"] = 1, ["fillMode"] = "line"}
+
+buttonSpace = 10
+
 mousedown = false
 
 width = 500
@@ -111,6 +120,14 @@ function love.draw()
 				blueFillMode = "fill"
 			end
 
+			for key, value in pairs(buttons) do
+				value["fillMode"] = "line"
+				if value["x"] < love.mouse.getX() and love.mouse.getX() < value["x"] + buttonWidth then
+					value["fillMode"] = "fill"
+					moveType = key
+				end
+			end
+
 		-- check if user clicked the lion button
 		elseif lionX <= love.mouse.getX() and  love.mouse.getX() <= lionX+50 and lionY <= love.mouse.getY() and  love.mouse.getY() <= lionY+50 then
 			paintImageData = love.image.newImageData("lion.png")
@@ -166,12 +183,17 @@ function love.draw()
 	love.graphics.circle("line", love.mouse.getX(), love.mouse.getY(), 10, 100)
 
 	-- draw colour buttons
-	love.graphics.setColor(255,0,0,255)
-	love.graphics.rectangle(redFillMode, redButtonX, buttonY, buttonWidth, buttonHeight)
-	love.graphics.setColor(0,255,0,255)
-	love.graphics.rectangle(greenFillMode, greenButtonX, buttonY, buttonWidth, buttonHeight)
-	love.graphics.setColor(0,0,255,255)
-	love.graphics.rectangle(blueFillMode, blueButtonX, buttonY, buttonWidth, buttonHeight)
+	--love.graphics.setColor(255,0,0,255)
+	--love.graphics.rectangle(redFillMode, redButtonX, buttonY, buttonWidth, buttonHeight)
+	--love.graphics.setColor(0,255,0,255)
+	--love.graphics.rectangle(greenFillMode, greenButtonX, buttonY, buttonWidth, buttonHeight)
+	--love.graphics.setColor(0,0,255,255)
+	--love.graphics.rectangle(blueFillMode, blueButtonX, buttonY, buttonWidth, buttonHeight)
+
+	for key, value in pairs(buttons) do
+		love.graphics.setColor(value["r"], value["g"], value["b"], 255)
+		love.graphics.rectangle(value["fillMode"], value["x"], buttonY, buttonWidth, buttonHeight)
+	end
 
 	-- reset colours
 	love.graphics.setColor(255,255,255,255)

@@ -123,10 +123,15 @@ function love.draw()
 			]]--
 
 			for key, value in pairs(buttons) do
-				value["fillMode"] = "line"
+				--value["fillMode"] = "line"
 				if value["x"] < love.mouse.getX() and love.mouse.getX() < value["x"] + buttonWidth then
 					if value["fillMode"] == "line" then
 						value["fillMode"] = "fill"
+						for k, v in pairs(buttons) do
+							if k ~= key then
+								v["fillMode"] = "line"
+							end
+						end
 						moveType = key
 					else
 						value["fillMode"] = "line"
@@ -146,7 +151,7 @@ function love.draw()
 						end
 
 					end
-					
+
 				end
 			end
 

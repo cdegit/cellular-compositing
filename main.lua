@@ -12,7 +12,11 @@ image3Cells = {}
 cellCount = 50
 cellModel = {}
 
+--how painted cells will move
 moveType = ""
+
+--default image to paint
+paintImageData = love.image.newImageData("space.png")
 
 collisionMatrix = {}
 
@@ -21,15 +25,24 @@ alert = ""
 redFillMode = "line"
 greenFillMode = "line"
 blueFillMode = "line"
+lionSelectedFill = 0
 
 mousedown = false
 
+width = 500
+height = 600
+
 function love.load()
-	love.window.setMode(500, 600)
+
+	love.window.setMode(width, height)
 
 	imageData = love.image.newImageData("colors.png")
 	image = love.graphics.newImage(imageData)
 	moveImage = love.image.newImageData("colors.png")
+
+	-- for use as a button
+	lionImageData = love.image.newImageData("lion.png")
+	lionImage = love.graphics.newImage(lionImageData)
 
 	-- to fix blurry image scaling
 	image:setFilter( 'nearest', 'nearest' )
@@ -67,13 +80,17 @@ function love.draw()
 	local greenButtonX = 220
 	local blueButtonX = 160
 
+	local lionX = 300
+	local lionY = 510
+
 	if mousedown then
 		-- just add some cells for now
 
-		-- check if user clicked a button
+		-- check if user clicked a colour button
 		if buttonY < love.mouse.getY() and love.mouse.getY() < buttonY + buttonHeight then
 			-- red button
 			if redButtonX < love.mouse.getX() and love.mouse.getX() < redButtonX + buttonWidth then
+				-- set the button to a different fill style, change the movement type of the cell to be added
 				moveType = "red"
 				redFillMode = "fill"
 				greenFillMode = "line"
@@ -94,9 +111,17 @@ function love.draw()
 				blueFillMode = "fill"
 			end
 
+		-- check if user clicked the lion button
+		elseif lionX <= love.mouse.getX() and  love.mouse.getX() <= lionX+50 and lionY <= love.mouse.getY() and  love.mouse.getY() <= lionY+50 then
+			paintImageData = love.image.newImageData("lion.png")
+			lionSelectedFill = 255
+
 		-- check if the user is painting inside the image
-		elseif 0 <= love.mouse.getY() and love.mouse.getY() <= 500 and 0 <= love.mouse.getX() and love.mouse.getX() <= 500 then
-			local tempCell = Cell.create(love.image.newImageData("space.png"))
+		elseif 0 <= love.mouse.getX() and love.mouse.getX() <= width and 0 <= love.mouse.getY() and love.mouse.getY() <= height-100 then
+			-- set paint image if it's set
+			-- local tempCell
+
+			local tempCell = Cell.create(paintImageData)
 
 			if moveType ~= "" then
 				tempCell.moveType = moveType
@@ -108,12 +133,14 @@ function love.draw()
 			tempCell.y = math.round(love.mouse.getY() / 5)
 			table.insert(cellModel, tempCell)
 
-		-- if the user didn't click a button and isn't painting, reset the selection
+		-- if the user didn't click a button and isn't painting, reset to defaults
 		else
 				moveType = ""
 				redFillMode = "line"
 				greenFillMode = "line"
 				blueFillMode = "line"
+				paintImageData = love.image.newImageData("space.png")
+				lionSelectedFill = 0
 		end
 	end
 
@@ -138,15 +165,29 @@ function love.draw()
 
 	love.graphics.circle("line", love.mouse.getX(), love.mouse.getY(), 10, 100)
 
-	-- draw buttons
+	-- draw colour buttons
 	love.graphics.setColor(255,0,0,255)
 	love.graphics.rectangle(redFillMode, redButtonX, buttonY, buttonWidth, buttonHeight)
 	love.graphics.setColor(0,255,0,255)
 	love.graphics.rectangle(greenFillMode, greenButtonX, buttonY, buttonWidth, buttonHeight)
 	love.graphics.setColor(0,0,255,255)
 	love.graphics.rectangle(blueFillMode, blueButtonX, buttonY, buttonWidth, buttonHeight)
-	-- reset colours after drawing buttons
+
+	-- reset colours
 	love.graphics.setColor(255,255,255,255)
+
+	-- lion button
+	love.graphics.push()
+	love.graphics.scale(0.5)
+	love.graphics.draw(lionImage, lionX*2, lionY*2)
+	love.graphics.pop()
+
+	-- lion button selected or not
+	love.graphics.setColor(255,255,255,lionSelectedFill)
+	love.graphics.rectangle("line", lionX, lionY, 50, 50)
+
+	-- reset colours
+	love.graphics.setColor(255,255,255, 255)
 
 	alert = actualCells .. " / " .. table.getn(cellModel)
 	love.graphics.print(alert, 0, 500)

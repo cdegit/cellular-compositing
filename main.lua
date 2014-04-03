@@ -94,6 +94,7 @@ function love.draw()
 				blueFillMode = "fill"
 			end
 
+		-- check if the user is painting inside the image
 		elseif 0 <= love.mouse.getY() and love.mouse.getY() <= 500 and 0 <= love.mouse.getX() and love.mouse.getX() <= 500 then
 			local tempCell = Cell.create(love.image.newImageData("space.png"))
 
@@ -107,6 +108,7 @@ function love.draw()
 			tempCell.y = math.round(love.mouse.getY() / 5)
 			table.insert(cellModel, tempCell)
 
+		-- if the user didn't click a button and isn't painting, reset the selection
 		else
 				moveType = ""
 				redFillMode = "line"

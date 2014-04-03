@@ -16,6 +16,9 @@ function Cell.create(image)
 
    cell.source = image
 
+  -- target colour to move towards
+	 cell.targetColor = {255, 0, 255}
+
    local moveRand = math.random(1, 5)
 
    if moveRand == 1 then
@@ -26,13 +29,13 @@ function Cell.create(image)
 	cell.moveType = "red"
    elseif moveRand == 4 then
    	cell.moveType = "blue"
-   else 
+   else
    	cell.moveType = "green"
    end
 
 
    local drawRand = math.random(1, 3)
-   
+
    if drawRand == 1 then
    	cell.drawType = "set"
    elseif drawRand == 2 then
@@ -97,6 +100,9 @@ function Cell:hillClimb(canvas)
 
 	local newr, newg, newb = canvas:getPixel(self.x, self.y)
 
+	-- set closest colour distance to max (~441)
+	local closestColorDistance = math.sqrt((255)^2+(255)^2+(255^2))
+
 	for x = -1, 1 do
 		for y = -1, 1 do
 			if not self:inLastLocations(x, y) then -- this isn't actually helping the way I think it is
@@ -133,6 +139,17 @@ function Cell:hillClimb(canvas)
 							break
 						end
 					end
+
+					if self.moveType == "target" then
+						-- if the color distance between the current pixel in the kernel and the target color
+						-- is less than the closest colour distance
+						if self:colorDistance(r, g, b, self.targetColor[1], self.targetColor[2], self.targetColor[3]) < closestColorDistance then
+							-- set the newX and newY, since it's closer to the target colour
+							closestColorDistance = self:colorDistance(r, g, b, self.targetColor[1], self.targetColor[2], self.targetColor[3])
+							closestX = x
+							closestY = y
+						end
+					end
 				end
 			end
 		end
@@ -145,11 +162,20 @@ function Cell:hillClimb(canvas)
 
 	-- now we have newX and newY set to what we want
 	-- so we can move to those locations
-	self.x = self.x + newX
-	self.x = math.clamp(self.x, 0, 99)
+	if self.moveType == "target" then
+		self.x = self.x + closestX
+		self.x = math.clamp(self.x, 0, 99)
 
-	self.y = self.y + newY
-	self.y = math.clamp(self.y, 0, 99)
+		self.y = self.y + closestY
+		self.y = math.clamp(self.y, 0, 99)
+	else
+		self.x = self.x + newX
+		self.x = math.clamp(self.x, 0, 99)
+
+		self.y = self.y + newY
+		self.y = math.clamp(self.y, 0, 99)
+	end
+
 
 	-- add this location to the list of last locations so we won't go back to this point for the next few steps
 	local location = {self.y, self.x}
@@ -220,6 +246,12 @@ function Cell:bluer(b1, b2)
 	end
 end
 
+function Cell:colorDistance(r1, g1, b1, r2, g2, b2)
+		-- check distance for R G B
+	d = math.sqrt((r2-r1)^2+(g2-g1)^2+(b2-b1)^2)
+	return d
+end
+
 -- maybe also add edges, maybe even watersheds if feeling ambitious
 
 
@@ -279,7 +311,7 @@ function Cell:checkCollisions(collisionMatrix, cellModel, lastX, lastY)
 
 	if collisionMatrix[self.x][self.y] == 0 then
 		collisionMatrix[self.x][self.y] = self.id
-	else 
+	else
 		local cellIndex = collisionMatrix[self.x][self.y]
 		if(cellModel[cellIndex] ~= -1) then
 			self:reproduce(cellModel[cellIndex], cellModel)
@@ -298,7 +330,7 @@ function Cell:reproduce(otherParent, cellModel)
 	-- entry in collision matrix is now for child
 	-- parents are not removed from the cell model, but they are set to null?
 	-- this isn't ideal, but it's more efficient than getting all the other cells to update their indices
-	-- can grow exponentially? But does have an upper bound so we cool. 
+	-- can grow exponentially? But does have an upper bound so we cool.
 
 	-- n + n/2 + n/4 + n/8...
 	-- Sum of n/2^i, while 2^i <= n
@@ -327,7 +359,7 @@ function Cell:reproduce(otherParent, cellModel)
 	childCell.y = self.y
 
 	table.insert(cellModel, childCell)
-	
+
 	-- remove parents
 	cellModel[self.id] = -1
 	cellModel[otherParent.id] = -1

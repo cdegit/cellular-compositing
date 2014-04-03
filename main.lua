@@ -204,3 +204,62 @@ function love.mousereleased(x, y, button)
 		mousedown = false
 	end
 end
+
+
+-- takes newImageData object as a parameter
+function generateEdgeImage(image)
+	-- create a copy of the image to return
+	resultImage = image
+
+	-- for each pixel
+	for x = 2, 98, 1 do
+		for y = 2, 98, 1 do
+			-- set channel totals to 0 for each pixel
+			rTotal = 0
+			gTotal = 0
+			bTotal = 0
+
+			-- for the 3x3 kernel
+			for i = -1, 1, 1 do
+				for j = -1, 1, 1 do
+
+					pixelX = x+i
+					pixelY = y+j
+
+					-- get the R G B values of the kernel's current pixel
+					newR, newG, newB = image:getPixel(pixelX, pixelY)
+
+					newR = newR/255
+					newG = newG/255
+					newB = newB/255
+
+					-- if it's the middle pixel, multiply by 8
+					if i==0 and j==0 then
+						newR = newR * 8
+						newG = newG * 8
+						newB = newB * 8
+					-- for the other pixels, multiply by -1
+					else
+						newR = newR * (-1)
+						newG = newG * (-1)
+						newB = newB * (-1)
+					end
+					-- add all the result values together
+					rTotal = rTotal + newR
+					gTotal = gTotal + newG
+					bTotal = bTotal + newB
+				end
+			end
+
+			-- make sure the values don't clip
+			rTotal = (math.clamp(rTotal, 0, 1))*255
+			gTotal = (math.clamp(gTotal, 0, 1))*255
+			bTotal = (math.clamp(bTotal, 0, 1))*255
+			-- alert = bTotal
+
+			-- set the current pixel
+			resultImage:setPixel(x, y, rTotal*255, gTotal*255, bTotal*255)
+		end
+	end
+	return resultImage
+end

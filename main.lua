@@ -98,6 +98,7 @@ function love.draw()
 		-- check if user clicked a colour button
 		if buttonY < love.mouse.getY() and love.mouse.getY() < buttonY + buttonHeight then
 			-- red button
+			--[[
 			if redButtonX < love.mouse.getX() and love.mouse.getX() < redButtonX + buttonWidth then
 				-- set the button to a different fill style, change the movement type of the cell to be added
 				moveType = "red"
@@ -119,12 +120,33 @@ function love.draw()
 				greenFillMode = "line"
 				blueFillMode = "fill"
 			end
+			]]--
 
 			for key, value in pairs(buttons) do
 				value["fillMode"] = "line"
 				if value["x"] < love.mouse.getX() and love.mouse.getX() < value["x"] + buttonWidth then
-					value["fillMode"] = "fill"
-					moveType = key
+					if value["fillMode"] == "line" then
+						value["fillMode"] = "fill"
+						moveType = key
+					else
+						value["fillMode"] = "line"
+
+						-- select random move type
+						local newMoveRand = math.random(1, 5)
+						if newMoveRand == 1 then
+							moveType = "red"
+						elseif newMoveRand == 2 then
+							moveType = "green"
+						elseif newMoveRand == 3 then
+							moveType = "blue"
+						elseif newMoveRand == 4 then
+							moveType = "bright"
+						elseif newMoveRand == 5 then
+							moveType = "dark"
+						end
+
+					end
+					
 				end
 			end
 
